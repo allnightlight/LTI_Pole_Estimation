@@ -3,23 +3,23 @@ import os
 import pickle
 import itertools
 import sqlite3
-from work001modules import *
+from modules import *
 from datetime import datetime, timedelta
 
-conn = sqlite3.connect('work001db.sqlite')
+conn = sqlite3.connect('db.sqlite')
 cur = conn.cursor()
 
 # initialize data generator
 Ny = 1
 Nu = 2
 data_generator = DataGenerator()
-lti_file_path = './work001tmp/data001.pk'
+lti_file_path = './tmp/data001.pk'
 with open(lti_file_path,'wb') as fp:
     pickle.dump(data_generator, fp)
 
 # run training
 mdl_constructor = [lambda Nhidden: model001(Ny,Nu,Nhidden), ]
-lti_file_path = ['./work001tmp/data001.pk',]
+lti_file_path = ['./tmp/data001.pk',]
 Nbatch = [2**5,]
 Nepoch = [2**2,]
 Nhrz = [2**0, 2**1, 2**2, 2**3,]
@@ -47,7 +47,7 @@ for mdl_constructor_, lti_file_path_, Nbatch_, Nepoch_, Nhrz_, Nhidden_ in itert
     cur.execute('''Select Count(id) from Result''')
     cnt = cur.fetchone()[0]
     
-    model_file_path = "./work001tmp/model_%04d.pt" % cnt
+    model_file_path = "./tmp/model_%04d.pt" % cnt
     torch.save(mdl.state_dict(), model_file_path)
 
     cur.execute('''Select id from Training where  Nbatch = ? and Nepoch = ? and Nhrz = ?''', 

@@ -3,7 +3,7 @@ import sqlite3
 import os
 import shutil
 
-conn = sqlite3.connect('work001db.sqlite')
+conn = sqlite3.connect('db.sqlite')
 cur = conn.cursor()
 
 cur.executescript('''
@@ -34,7 +34,7 @@ Nhidden Integer
 
 ''')
 
-tmp_folder_path = "./work001tmp"
+tmp_folder_path = "./tmp"
 if os.path.exists(tmp_folder_path):
     shutil.rmtree(tmp_folder_path)
 os.mkdir(tmp_folder_path)
