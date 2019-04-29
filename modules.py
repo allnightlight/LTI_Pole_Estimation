@@ -27,17 +27,46 @@ class model001(nn.Module):
         return _Y, dict()
 
 class DataGenerator():
-    def __init__(self):
-        self.Ntrain = 2**10
-        self.Ny, self.Nu = 2**0, 2**1
-        self.U = np.random.randn(self.Ntrain, self.Nu).astype(np.float32)
-        w = np.random.randn(self.Nu, self.Ny)
-        Y = np.cumsum(np.dot(self.U, w), axis=0)
+    def __init__(self, Nhidden, Ntrain = 2**12, T0 = 2**1, T1 = 2**7, 
+        Ny = None, Nu = None):
+
+        Ny = Nhidden if Ny is None else Ny
+        Nu = Nhidden if Nu is None else Nu
+        Nhalf = Nhidden//2
+
+# pole/continuous time system = -alpha + 1j * beta * 2 * pi
+        alpha = 1/np.exp(np.log(T0) + np.random.rand(Nhalf) * (np.log(T1) - np.log(T0)))
+        beta  = 1/np.exp(np.log(T0) + np.random.rand(Nhalf) * (np.log(T1) - np.log(T0)))
+
+        Diag = np.diag(np.concatenate([np.exp(-alpha + 1j * beta * np.pi), np.exp(-alpha - 1j * beta * np.pi)], axis=0))
+        Vr = np.random.randn(Nhidden, Nhalf) 
+        Vi = np.random.randn(Nhidden, Nhalf) 
+        V = np.concatenate([Vr + 1j * Vi, Vr - 1j * Vi], axis=1)
+
+        A = np.real(np.dot( np.dot(V, Diag), np.linalg.inv(V)))
+        B = np.random.randn(Nhidden, Nu)
+        C = np.random.randn(Ny, Nhidden)
+
+        x = np.random.randn(Nhidden)
+        X = [x,]
+        U = np.random.randn(Ntrain, Nu)
+        for k1 in range(Ntrain):
+            u = U[k1,:]
+            x = np.dot(A, x) + np.dot(B, u)
+            X.append(x)
+        X = np.stack(X, axis=0)
+        Y = np.dot(X, C.T)
         Y = (Y - np.mean(Y, axis=0))/np.std(Y, axis=0)
+
+        self.U = U.astype(np.float32)
         self.Y = Y.astype(np.float32)
+        self.Ntrain = Ntrain
+        self.Nhidden = Nhidden
+        self.Nu = Nu
+        self.Ny = Ny
 
     def next(self, Nbatch, Nhrz):
-        idx = np.random.randint(low=0, high=self.Ntrain-Nhrz-1, size=(Nbatch,))
+        idx = np.random.randint(low=0, high=self.Ntrain-Nhrz, size=(Nbatch,))
         idx = idx.reshape((1,-1)) + np.arange(Nhrz+1).reshape(-1,1) # (Nhrz+1, Nbatch)
         Ubatch = self.U[idx[:-1,:],:] # (Nhrz, *, Nu)
         Ybatch = self.Y[idx,:] # (Nhrz+1, *, Nu)
@@ -65,12 +94,12 @@ def run_training(mdl_constructor, data_generator, Nhidden, Nbatch, Nepoch, Nhrz,
 
             loss = float(_loss)
             training_hist.append((epoch + k1/Nitr, loss))  
-            if print_log:
-                sys.stdout.write('epoch %04d/%04d itr %03d loss %8.2e\r' % (epoch, Nepoch, k1, loss))
 
             mdl.zero_grad()
             _loss.backward()
             optimizer.step()
+        if print_log:
+            sys.stdout.write('epoch %04d/%04d itr %03d loss %8.2e\r' % (epoch, Nepoch, k1, loss))
     return mdl, training_hist
 
 def test001():
@@ -98,7 +127,7 @@ def test001():
 
 def test002():
 
-    data_generator = DataGenerator()
+    data_generator = DataGenerator(2**2, Ntrain = 2**7)
     Ny, Nu = data_generator.Ny, data_generator.Nu
     mdl_constructor = lambda Nhidden: model001(Ny, Nu, Nhidden)
     Nhidden, Nbatch, Nepoch, Nhrz =  np.random.randint(1, 100, size=(4,))
@@ -108,6 +137,7 @@ def test002():
 
 
 if __name__ == "__main__":
+    test001()
     test002()
 
         

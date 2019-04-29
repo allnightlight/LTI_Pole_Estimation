@@ -10,20 +10,23 @@ conn = sqlite3.connect('db.sqlite')
 cur = conn.cursor()
 
 # initialize data generator
-Ny = 1
-Nu = 2
-data_generator = DataGenerator()
-lti_file_path = './tmp/data001.pk'
-with open(lti_file_path,'wb') as fp:
+data_generator = DataGenerator(Nhidden = 2**3, Ntrain = 2**10)
+Ny, Nu = data_generator.Ny, data_generator.Nu
+
+cur.execute('''Select count(id) from Data ''')
+cnt = cur.fetchone()[0]
+
+lti_file_path_ = './tmp/data_%03d.pk' % cnt
+with open(lti_file_path_, 'wb') as fp:
     pickle.dump(data_generator, fp)
+lti_file_path = [lti_file_path_,]
 
 # run training
 mdl_constructor = [lambda Nhidden: model001(Ny,Nu,Nhidden), ]
-lti_file_path = ['./tmp/data001.pk',]
 Nbatch = [2**5,]
-Nepoch = [2**2,]
-Nhrz = [2**0, 2**1, 2**2, 2**3,]
-Nhidden = [2**0,]
+Nepoch = [2**5, 2**7, 2**9]
+Nhrz = [2**0, 2**3,]
+Nhidden = [2**5,]
 
 t_bgn = datetime.now()
 for mdl_constructor_, lti_file_path_, Nbatch_, Nepoch_, Nhrz_, Nhidden_ in itertools.cycle(itertools.product(
@@ -59,3 +62,6 @@ for mdl_constructor_, lti_file_path_, Nbatch_, Nepoch_, Nhrz_, Nhidden_ in itert
     
     cur.execute('''Insert into Result (training_id, data_id, model_file_path, Nhidden) values (?, ?, ?, ?) ''', 
         (training_id, data_id, model_file_path, Nhidden_))
+
+    conn.commit()
+conn.close()
