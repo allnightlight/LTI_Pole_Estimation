@@ -15,7 +15,8 @@ Create Table Training (
 id Integer Primary Key Unique,
 Nbatch Integer,
 Nepoch Integer,
-Nhrz Integer
+Nhrz Integer,
+Unique(Nbatch, Nepoch, Nhrz)
 );
 
 Create Table Data (

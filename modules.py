@@ -1,6 +1,7 @@
 
 import sys
 import numpy as np
+from scipy.optimize import linprog
 import torch 
 import torch.nn as nn
 
@@ -58,6 +59,9 @@ class DataGenerator():
         Y = np.dot(X, C.T)
         Y = (Y - np.mean(Y, axis=0))/np.std(Y, axis=0)
 
+        self.A = A
+        self.B = B
+        self.C = C
         self.U = U.astype(np.float32)
         self.Y = Y.astype(np.float32)
         self.Ntrain = Ntrain
@@ -102,6 +106,55 @@ def run_training(mdl_constructor, data_generator, Nhidden, Nbatch, Nepoch, Nhrz,
             sys.stdout.write('epoch %04d/%04d itr %03d loss %8.2e\r' % (epoch, Nepoch, k1, loss))
     return mdl, training_hist
 
+def calc_wdist(c, p = None, q = None):
+# c: (n,m)
+    n, m = c.shape
+    if p is None:
+        p = np.ones((m,))/m
+    if q is None:
+        q = np.ones((n,))/n
+
+    A_eq = np.zeros((m+n, m*n))
+    for k1 in range(n):
+        A_eq[m+k1, k1*m:(k1+1)*m] = 1
+    for k1 in range(m):
+        A_eq[k1, k1::m] = 1
+    b_eq = np.concatenate((p,q), axis=0)
+
+    bounds = ((0,1),) * (m*n)
+
+    res = linprog(c.reshape(-1), A_eq=A_eq, b_eq=b_eq, bounds=bounds, 
+        method = "interior-point", options = {'disp': False})
+
+    wdist = res.fun
+    P = res.x.reshape(n,m) # (n,m)
+    return wdist, P
+
+def check_spectrum(A, A_hat):
+# check_spectrum given A and A_hat
+    Nhidden = A.shape[0]
+    assert A.shape == (Nhidden, Nhidden)
+    assert A_hat.shape == (Nhidden, Nhidden)
+
+    lmbd, _ = np.linalg.eig(A)
+    lmbd_hat, _ = np.linalg.eig(A_hat)
+
+    alpha = np.log(np.abs(lmbd)) + 1e-8
+    beta = np.angle(lmbd) + 1e-8
+
+    alpha_hat = np.log(np.abs(lmbd_hat))
+    beta_hat = np.angle(lmbd_hat)
+
+    c = 1/2 * np.abs(1-alpha_hat.reshape(-1,1)/alpha.reshape(1,-1)) \
+        + 1/2 * np.abs(1-beta_hat.reshape(-1,1)/beta.reshape(1,-1))
+
+    #c = 1/2 * np.abs(alpha_hat.reshape(-1,1)-alpha.reshape(1,-1)) \
+    #    + 1/2 * np.abs(beta_hat.reshape(-1,1)-beta.reshape(1,-1))
+
+    wdist, _ = calc_wdist(c)
+
+    return wdist
+
 def test001():
 
     for k1 in range(2**3):
@@ -135,10 +188,26 @@ def test002():
     run_training(mdl_constructor, data_generator, Nhidden, Nbatch, Nepoch, Nhrz)
     pass
 
+def test003():
+    m = 5
+    n = 2
+    c = np.exp(np.random.randn(n, m))
+
+    _, P = calc_wdist(c)
+    
+    assert P.shape == (n, m)
+    assert np.all(P >= 0)
+    assert np.all(P <= 1)
+
+    Nhidden = 2**3
+    A = np.random.randn(Nhidden, Nhidden)
+    A_hat = np.random.randn(Nhidden, Nhidden)
+    wdist = check_spectrum(A, A_hat)
 
 if __name__ == "__main__":
     test001()
     test002()
+    test003()
 
         
 

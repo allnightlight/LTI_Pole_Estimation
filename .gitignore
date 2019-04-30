@@ -2,3 +2,4 @@
 *.swo
 /tmp
 *.sqlite
+/__pycache__
