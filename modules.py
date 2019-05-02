@@ -4,6 +4,7 @@ import numpy as np
 from scipy.optimize import linprog
 import torch 
 import torch.nn as nn
+import itertools
 
 class model001(nn.Module):
     def __init__(self, Ny, Nu, Nhidden):
@@ -26,6 +27,56 @@ class model001(nn.Module):
         _X = torch.stack(X, dim=0) # (Nhrz, *, Nhidden)
         _Y = self.x2y(_X) # (Nhrz, *, Ny)
         return _Y, dict()
+
+
+# x0 = (x0_real, x0_imag) 
+# x1 = (x1_real, x1_imag)
+# u = (u_real, 0)
+# lmbd = (lmbd_real, lmbd_imag)
+# B = (B_real, B_imag)
+# x1 = (lmbd_real + 1j * lmbd_imag) * x0 + (B_real + 1j * B_imag) * u
+#   x1_real = lmbd_real * x0_real - lmbd_imag * x0_imag + B_real * u
+#   x1_imag = lmbd_real * x0_imag + lmbd_real * x0_real + B_imag * u
+def single_step(_x0, _u, _B, _lmbd_real, _lmbd_imag):
+# _x0: (*, Nx)
+# _u: (*, Nu)
+# _B: (Nx, Nu)
+# _lmbd_real: (Nx//2,)
+# _lmbd_imag: (Nx//2,)
+    Nx = _x0.shape[1]
+    _x0_real, _x0_imag = torch.chunk(_x0, 2, dim=1) # (*, Nx//2), (*, Nx//2)
+    _B_real, _B_imag = torch.chunk(_B, 2, dim=0) # (Nx//2, Nu)
+    _x1_real = _lmbd_real * _x0_real - _lmbd_imag * _x0_imag +  torch.matmul(_u, _B_real.t()) # (*, Nx//2)
+    _x1_imag = _lmbd_real * _x0_imag + _lmbd_imag * _x0_real +  torch.matmul(_u, _B_imag.t()) # (*, Nx//2)
+    _x1 = torch.cat((_x1_real, _x1_imag), dim=1) # (*, Nx)
+    return _x1
+
+
+class model002(nn.Module):
+    def __init__(self, Ny, Nu, Nhidden):
+        super(model002, self).__init__()
+        self.Ny, self.Nu, self.Nhidden = Ny, Nu, Nhidden 
+        self._lmbd_real = nn.Parameter(torch.randn(Nhidden//2,))
+        self._lmbd_imag = nn.Parameter(torch.randn(Nhidden//2,))
+        self._B = nn.Parameter(torch.randn(Nhidden,Nu))
+        self.y2x = nn.Linear(Ny, Nhidden)
+        self.x2y = nn.Linear(Nhidden, Ny)
+
+    def forward(self, _y0, _U):
+        # _y0: (*, Ny), _U: (Nhrz, *, Nu)
+        Nhrz = _U.shape[0]
+
+        X = []
+        _x = self.y2x(_y0) # (*, Nhidden)
+        for k1 in range(Nhrz):
+            _u = _U[k1,:] # (*, Nu)
+            _x = single_step(_x, _u, self._B, 
+                self._lmbd_real, self._lmbd_imag) # (*, Nhidden)
+            X.append(_x)
+        _X = torch.stack(X, dim=0) # (Nhrz, *, Nhidden)
+        _Y = self.x2y(_X) # (Nhrz, *, Ny)
+        return _Y, dict()
+
 
 class DataGenerator():
     def __init__(self, Nhidden, Ntrain = 2**12, T0 = 2**1, T1 = 2**7, 
@@ -76,6 +127,7 @@ class DataGenerator():
         Ybatch = self.Y[idx,:] # (Nhrz+1, *, Nu)
         return Ybatch, Ubatch
 
+
 def run_training(mdl_constructor, data_generator, Nhidden, Nbatch, Nepoch, Nhrz, print_log = True):
     mdl = mdl_constructor(Nhidden)
     optimizer = torch.optim.Adam(mdl.parameters())
@@ -106,6 +158,7 @@ def run_training(mdl_constructor, data_generator, Nhidden, Nbatch, Nepoch, Nhrz,
             sys.stdout.write('epoch %04d/%04d itr %03d loss %8.2e\r' % (epoch, Nepoch, k1, loss))
     return mdl, training_hist
 
+
 def calc_wdist(c, p = None, q = None):
 # c: (n,m)
     n, m = c.shape
@@ -129,6 +182,7 @@ def calc_wdist(c, p = None, q = None):
     wdist = res.fun
     P = res.x.reshape(n,m) # (n,m)
     return wdist, P
+
 
 def check_spectrum(A, A_hat):
 # check_spectrum given A and A_hat
@@ -155,13 +209,15 @@ def check_spectrum(A, A_hat):
 
     return wdist
 
+
 def test001():
 
-    for k1 in range(2**3):
+    for k1, model_constructor \
+        in itertools.product(range(2**3), [model001, model002,]):
         sys.stdout.write("%04d\r" % k1)
 
         Ny, Nu, Nhidden = np.random.randint(1, 10, size=(3,))
-        mdl = model001(Ny, Nu, Nhidden)
+        mdl = model_constructor(Ny, Nu, Nhidden*2)
 
         Nbatch = np.random.randint(1, 10)
         Nhrz = np.random.randint(1, 10)
@@ -180,13 +236,13 @@ def test001():
 
 def test002():
 
-    data_generator = DataGenerator(2**2, Ntrain = 2**7)
-    Ny, Nu = data_generator.Ny, data_generator.Nu
-    mdl_constructor = lambda Nhidden: model001(Ny, Nu, Nhidden)
-    Nhidden, Nbatch, Nepoch, Nhrz =  np.random.randint(1, 100, size=(4,))
+    for model_constructor in [model001, model002,]*3:
 
-    run_training(mdl_constructor, data_generator, Nhidden, Nbatch, Nepoch, Nhrz)
-    pass
+        data_generator = DataGenerator(2**2, Ntrain = 2**7)
+        Ny, Nu = data_generator.Ny, data_generator.Nu
+        Nhidden, Nbatch, Nepoch, Nhrz =  np.random.randint(1, 20, size=(4,))
+
+        run_training(lambda Nhidden: model_constructor(Ny, Nu, Nhidden*2), data_generator, Nhidden, Nbatch, Nepoch, Nhrz)
 
 def test003():
     m = 5
