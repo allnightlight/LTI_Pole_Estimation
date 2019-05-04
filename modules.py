@@ -5,6 +5,7 @@ from scipy.optimize import linprog
 import torch 
 import torch.nn as nn
 import itertools
+import time
 
 class model001(nn.Module):
     def __init__(self, Ny, Nu, Nhidden):
@@ -29,36 +30,23 @@ class model001(nn.Module):
         return _Y, dict()
 
 
-# x0 = (x0_real, x0_imag) 
-# x1 = (x1_real, x1_imag)
-# u = (u_real, 0)
-# lmbd = (lmbd_real, lmbd_imag)
-# B = (B_real, B_imag)
-# x1 = (lmbd_real + 1j * lmbd_imag) * x0 + (B_real + 1j * B_imag) * u
-#   x1_real = lmbd_real * x0_real - lmbd_imag * x0_imag + B_real * u
-#   x1_imag = lmbd_real * x0_imag + lmbd_real * x0_real + B_imag * u
-def single_step(_x0, _u, _B, _lmbd_real, _lmbd_imag):
-# _x0: (*, Nx)
-# _u: (*, Nu)
-# _B: (Nx, Nu)
-# _lmbd_real: (Nx//2,)
-# _lmbd_imag: (Nx//2,)
-    Nx = _x0.shape[1]
-    _x0_real, _x0_imag = torch.chunk(_x0, 2, dim=1) # (*, Nx//2), (*, Nx//2)
-    _B_real, _B_imag = torch.chunk(_B, 2, dim=0) # (Nx//2, Nu)
-    _x1_real = _lmbd_real * _x0_real - _lmbd_imag * _x0_imag +  torch.matmul(_u, _B_real.t()) # (*, Nx//2)
-    _x1_imag = _lmbd_real * _x0_imag + _lmbd_imag * _x0_real +  torch.matmul(_u, _B_imag.t()) # (*, Nx//2)
-    _x1 = torch.cat((_x1_real, _x1_imag), dim=1) # (*, Nx)
-    return _x1
-
-
 class model002(nn.Module):
     def __init__(self, Ny, Nu, Nhidden):
         super(model002, self).__init__()
         self.Ny, self.Nu, self.Nhidden = Ny, Nu, Nhidden 
-        self._lmbd_real = nn.Parameter(torch.randn(Nhidden//2,))
-        self._lmbd_imag = nn.Parameter(torch.randn(Nhidden//2,))
-        self._B = nn.Parameter(torch.randn(Nhidden,Nu))
+
+        r = np.random.rand(Nhidden//2)
+        theta = np.random.rand(Nhidden//2) * np.pi/2
+        #theta = np.pi/4
+
+        lmbd_real = r * np.cos(theta) # (*, Nhidden//2)
+        lmbd_imag = r * np.sin(theta) # (*, Nhidden//2)
+        B = np.random.randn(Nhidden, Nu)/np.sqrt(Nu)
+
+        self._lmbd_real = nn.Parameter(torch.from_numpy(lmbd_real.astype(np.float32)))
+        self._lmbd_imag = nn.Parameter(torch.from_numpy(lmbd_imag.astype(np.float32)))
+        self._B = nn.Parameter(torch.from_numpy(B.astype(np.float32)))
+
         self.y2x = nn.Linear(Ny, Nhidden)
         self.x2y = nn.Linear(Nhidden, Ny)
 
@@ -67,13 +55,18 @@ class model002(nn.Module):
         Nhrz = _U.shape[0]
 
         X = []
+        _Bu = torch.matmul(_U, self._B.t()) # (Nhrz, *, Nx)
+
+        _A11 = torch.diag(self._lmbd_real) # = A22, (Nx//2, Nx//2)
+        _A21 = torch.diag(self._lmbd_imag) # = A21, (Nx//2, Nx//2)
+        _A = torch.cat((torch.cat((_A11, -_A21), dim=1), 
+            torch.cat((_A21, _A11), dim=1)), dim=0) #(Nx, Nx)
+
         _x = self.y2x(_y0) # (*, Nhidden)
         for k1 in range(Nhrz):
-            _u = _U[k1,:] # (*, Nu)
-            _x = single_step(_x, _u, self._B, 
-                self._lmbd_real, self._lmbd_imag) # (*, Nhidden)
+            _x = torch.matmul(_x, _A.t()) + _Bu[k1,:]
             X.append(_x)
-        _X = torch.stack(X, dim=0) # (Nhrz, *, Nhidden)
+        _X = torch.stack(X, dim=0) # (Nhrz, *, Nx)
         _Y = self.x2y(_X) # (Nhrz, *, Ny)
         return _Y, dict()
 
@@ -212,27 +205,32 @@ def check_spectrum(A, A_hat):
 
 def test001():
 
-    for k1, model_constructor \
-        in itertools.product(range(2**3), [model001, model002,]):
-        sys.stdout.write("%04d\r" % k1)
+    for k1 in range(2**3):
 
         Ny, Nu, Nhidden = np.random.randint(1, 10, size=(3,))
-        mdl = model_constructor(Ny, Nu, Nhidden*2)
 
-        Nbatch = np.random.randint(1, 10)
-        Nhrz = np.random.randint(1, 10)
+        Nbatch = 2**7
+        Nhrz = 2**6
 
         y0 =  np.random.randn(Nbatch, Ny).astype(np.float32)
         U =  np.random.randn(Nhrz, Nbatch, Nu).astype(np.float32)
-        
+
         _y0 = torch.tensor(y0) # (*, Ny)
         _U = torch.tensor(U) # (Nhrz, *, Nu)
 
-        _Yhat, _ = mdl(_y0, _U) # Nhrz, *, Ny
+        print("Ny, Nu, Nhidden = (%d, %d, %d)" % (Ny, Nu, Nhidden))
+        for model_constructor in [model001, model002, ]:
 
-        Yhat = _Yhat.data.numpy()
-        assert Yhat.shape == (Nhrz, Nbatch, Ny)
-        assert np.all(~np.isnan(Yhat))
+            mdl = model_constructor(Ny, Nu, Nhidden*2)
+
+            t_bgn = time.time()
+            _Yhat, _ = mdl(_y0, _U) # Nhrz, *, Ny
+            elapsed_time = time.time() - t_bgn
+            print("%40s \t %8.4f" % (model_constructor, elapsed_time))
+
+            Yhat = _Yhat.data.numpy()
+            assert Yhat.shape == (Nhrz, Nbatch, Ny)
+            assert np.all(~np.isnan(Yhat))
 
 def test002():
 

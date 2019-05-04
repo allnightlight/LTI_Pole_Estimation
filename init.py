@@ -7,9 +7,15 @@ conn = sqlite3.connect('db.sqlite')
 cur = conn.cursor()
 
 cur.executescript('''
+Drop Table If Exists ModelClass;
 Drop Table If Exists Data;
 Drop Table If Exists Result;
 Drop Table If Exists Training;
+
+Create Table ModelClass(
+id Integer Primary Key Unique,
+name Text Unique
+);
 
 Create Table Training (
 id Integer Primary Key Unique,
@@ -30,7 +36,8 @@ id Integer Primary Key,
 training_id Integer,
 data_id Integer,
 model_file_path Text Unique,
-Nhidden Integer
+Nhidden Integer, 
+modelclass_id Integer
 );
 
 ''')
