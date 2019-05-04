@@ -70,6 +70,89 @@ class model002(nn.Module):
         _Y = self.x2y(_X) # (Nhrz, *, Ny)
         return _Y, dict()
 
+class model003(nn.Module):
+    def __init__(self, Ny, Nu, Nhidden):
+        super(model003, self).__init__()
+        self.Ny, self.Nu, self.Nhidden = Ny, Nu, Nhidden 
+
+        lmbd_cont_real = np.random.rand(Nhidden//2) # (*, Nhidden//2)
+        lmbd_cont_imag = np.random.rand(Nhidden//2) # (*, Nhidden//2)
+        B = np.random.randn(Nhidden, Nu)/np.sqrt(Nu)
+
+        self._lmbd_cont_real = nn.Parameter(torch.from_numpy(lmbd_cont_real.astype(np.float32)))
+        self._lmbd_cont_imag = nn.Parameter(torch.from_numpy(lmbd_cont_imag.astype(np.float32)))
+        self._B = nn.Parameter(torch.from_numpy(B.astype(np.float32)))
+
+        self.y2x = nn.Linear(Ny, Nhidden)
+        self.x2y = nn.Linear(Nhidden, Ny)
+
+    def forward(self, _y0, _U):
+        # _y0: (*, Ny), _U: (Nhrz, *, Nu)
+        Nhrz = _U.shape[0]
+
+        X = []
+        _Bu = torch.matmul(_U, self._B.t()) # (Nhrz, *, Nx)
+
+        _r = torch.exp(-torch.abs(self._lmbd_cont_real)) # (Nx//2,)
+        _theta = np.pi/2 * self._lmbd_cont_imag # (Nx//2,)
+        _lmbd_real = _r * torch.cos(_theta) # (Nx//2,)
+        _lmbd_imag = _r * torch.sin(_theta) # (Nx//2,)
+
+        _A11 = torch.diag(_lmbd_real) # = A22, (Nx//2, Nx//2)
+        _A21 = torch.diag(_lmbd_imag) # = A21, (Nx//2, Nx//2)
+        _A = torch.cat((torch.cat((_A11, -_A21), dim=1), 
+            torch.cat((_A21, _A11), dim=1)), dim=0) #(Nx, Nx)
+
+        _x = self.y2x(_y0) # (*, Nhidden)
+        for k1 in range(Nhrz):
+            _x = torch.matmul(_x, _A.t()) + _Bu[k1,:]
+            X.append(_x)
+        _X = torch.stack(X, dim=0) # (Nhrz, *, Nx)
+        _Y = self.x2y(_X) # (Nhrz, *, Ny)
+        return _Y, dict()
+
+
+class model004(nn.Module):
+    def __init__(self, Ny, Nu, Nhidden):
+        super(model004, self).__init__()
+        self.Ny, self.Nu, self.Nhidden = Ny, Nu, Nhidden 
+
+        log_lmbd_cont_real = np.random.randn(Nhidden//2) # (*, Nhidden//2)
+        log_lmbd_cont_imag = np.random.randn(Nhidden//2) # (*, Nhidden//2)
+        B = np.random.randn(Nhidden, Nu)/np.sqrt(Nu)
+
+        self._log_lmbd_cont_real = nn.Parameter(torch.from_numpy(log_lmbd_cont_real.astype(np.float32)))
+        self._log_lmbd_cont_imag = nn.Parameter(torch.from_numpy(log_lmbd_cont_imag.astype(np.float32)))
+        self._B = nn.Parameter(torch.from_numpy(B.astype(np.float32)))
+
+        self.y2x = nn.Linear(Ny, Nhidden)
+        self.x2y = nn.Linear(Nhidden, Ny)
+
+    def forward(self, _y0, _U):
+        # _y0: (*, Ny), _U: (Nhrz, *, Nu)
+        Nhrz = _U.shape[0]
+
+        X = []
+        _Bu = torch.matmul(_U, self._B.t()) # (Nhrz, *, Nx)
+
+        _r = torch.exp(-torch.exp(-torch.abs(self._log_lmbd_cont_real))) # (Nx//2,)
+        _theta = np.pi/2 * torch.exp(-torch.abs(self._log_lmbd_cont_imag)) # (Nx//2,)
+        _lmbd_real = _r * torch.cos(_theta) # (Nx//2,)
+        _lmbd_imag = _r * torch.sin(_theta) # (Nx//2,)
+
+        _A11 = torch.diag(_lmbd_real) # = A22, (Nx//2, Nx//2)
+        _A21 = torch.diag(_lmbd_imag) # = A21, (Nx//2, Nx//2)
+        _A = torch.cat((torch.cat((_A11, -_A21), dim=1), 
+            torch.cat((_A21, _A11), dim=1)), dim=0) #(Nx, Nx)
+
+        _x = self.y2x(_y0) # (*, Nhidden)
+        for k1 in range(Nhrz):
+            _x = torch.matmul(_x, _A.t()) + _Bu[k1,:]
+            X.append(_x)
+        _X = torch.stack(X, dim=0) # (Nhrz, *, Nx)
+        _Y = self.x2y(_X) # (Nhrz, *, Ny)
+        return _Y, dict()
+
 
 class DataGenerator():
     def __init__(self, Nhidden, Ntrain = 2**12, T0 = 2**1, T1 = 2**7, 
@@ -207,10 +290,10 @@ def test001():
 
     for k1 in range(2**3):
 
-        Ny, Nu, Nhidden = np.random.randint(1, 10, size=(3,))
+        Ny, Nu, Nhidden = np.random.randint(1, 16, size=(3,))
 
-        Nbatch = 2**7
-        Nhrz = 2**6
+        Nbatch = 2**6
+        Nhrz = 2**7
 
         y0 =  np.random.randn(Nbatch, Ny).astype(np.float32)
         U =  np.random.randn(Nhrz, Nbatch, Nu).astype(np.float32)
@@ -219,7 +302,7 @@ def test001():
         _U = torch.tensor(U) # (Nhrz, *, Nu)
 
         print("Ny, Nu, Nhidden = (%d, %d, %d)" % (Ny, Nu, Nhidden))
-        for model_constructor in [model001, model002, ]:
+        for model_constructor in [model001, model002, model003, model004]:
 
             mdl = model_constructor(Ny, Nu, Nhidden*2)
 
@@ -234,7 +317,7 @@ def test001():
 
 def test002():
 
-    for model_constructor in [model001, model002,]*3:
+    for model_constructor in [model001, model002, model003, model004]*3:
 
         data_generator = DataGenerator(2**2, Ntrain = 2**7)
         Ny, Nu = data_generator.Ny, data_generator.Nu
