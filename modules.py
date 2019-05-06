@@ -198,128 +198,6 @@ class model004(nn.Module):
         eig_hat = np.concatenate((lmbd_real + 1j * lmbd_imag, lmbd_real - 1j * lmbd_imag))
         return eig_hat
 
-class model003a(nn.Module):
-    def __init__(self, Ny, Nu, Nhidden):
-        super(model003a, self).__init__()
-        self.Ny, self.Nu, self.Nhidden = Ny, Nu, Nhidden 
-
-        lmbd_cont_real = np.random.rand(Nhidden//2) # (*, Nhidden//2)
-        lmbd_cont_imag = np.random.rand(Nhidden//2) # (*, Nhidden//2)
-        B = np.random.randn(Nhidden, Nu)/np.sqrt(Nu)
-
-        self._lmbd_cont_real = nn.Parameter(torch.from_numpy(lmbd_cont_real.astype(np.float32)))
-        self._lmbd_cont_imag = nn.Parameter(torch.from_numpy(lmbd_cont_imag.astype(np.float32)))
-        self._B = nn.Parameter(torch.from_numpy(B.astype(np.float32)))
-
-        self.y2x = nn.Linear(Ny, Nhidden)
-        self.x2y = nn.Linear(Nhidden, Ny)
-
-    def forward(self, _y0, _U):
-        # _y0: (*, Ny), _U: (Nhrz, *, Nu)
-        Nhrz = _U.shape[0]
-
-        X = []
-        _Bu = torch.matmul(_U, self._B.t()) # (Nhrz, *, Nx)
-        _Bu.unsqueeze_(2) # (Nhrz, *, 1, Nx)
-
-        _lmbd_cont_real_series = torch.arange(float(Nhrz),0,-1).reshape(-1,1) \
-            * self._lmbd_cont_real.reshape(1,-1) # (Nhrz, Nx//2,)
-        _lmbd_cont_imag_series = torch.arange(float(Nhrz),0,-1).reshape(-1,1) \
-            * self._lmbd_cont_imag.reshape(1,-1) # (Nhrz, Nx//2,)
-
-        _r_series = torch.exp(-torch.abs(_lmbd_cont_real_series)) # (Nhrz,Nx//2,)
-        _theta_series = np.pi/2 * _lmbd_cont_imag_series # (Nhrz,Nx//2,)
-        _lmbd_real_series = _r_series * torch.cos(_theta_series) # (Nhrz,Nx//2,)
-        _lmbd_imag_series = _r_series * torch.sin(_theta_series) # (Nhrz,Nx//2,)
-
-        _A11_series = torch.diag_embed(_lmbd_real_series) # = A22, (Nhrz, Nx//2, Nx//2)
-        _A21_series = torch.diag_embed(_lmbd_imag_series) # = A21, (Nhrz, Nx//2, Nx//2)
-        _A_series = torch.cat((torch.cat((_A11_series, -_A21_series), dim=2), 
-            torch.cat((_A21_series, _A11_series), dim=2)), dim=1) #(Nhrz, Nx, Nx)
-        _A_series.unsqueeze_(1) # (Nhrz, 1, Nx, Nx)
-
-        _x0 = self.y2x(_y0) # (*, Nhidden)
-        _x0.unsqueeze_(1) # (*, 1, Nhidden)
-        for k1 in range(Nhrz):
-            _x = _Bu[k1,:,0,:] \
-                + torch.sum(_Bu[:k1,:] * _A_series[Nhrz-k1:,:], dim=(0,3)) \
-                + torch.sum(_A_series[Nhrz-1-k1,:] * _x0, dim=2) # (*, Nx)
-            X.append(_x)
-        _X = torch.stack(X, dim=0) # (Nhrz, *, Nx)
-        _Y = self.x2y(_X) # (Nhrz, *, Ny)
-        return _Y, dict()
-
-    def get_eig(self):
-        lmbd_cont_real = self._lmbd_cont_real.data.numpy()
-        lmbd_cont_imag = self._lmbd_cont_imag.data.numpy()
-        
-        r = np.exp(-np.abs(lmbd_cont_real))
-        theta = np.pi/2 * lmbd_cont_imag
-        
-        lmbd_real = r * np.cos(theta)
-        lmbd_imag = r * np.sin(theta)
-        
-        eig_hat = np.concatenate((lmbd_real + 1j * lmbd_imag, lmbd_real - 1j * lmbd_imag))
-        return eig_hat
-
-class model003b(nn.Module):
-    def __init__(self, Ny, Nu, Nhidden):
-        super(model003b, self).__init__()
-        self.Ny, self.Nu, self.Nhidden = Ny, Nu, Nhidden 
-
-        lmbd_cont_real = np.random.rand(Nhidden//2) # (*, Nhidden//2)
-        lmbd_cont_imag = np.random.rand(Nhidden//2) # (*, Nhidden//2)
-        B = np.random.randn(Nhidden, Nu)/np.sqrt(Nu)
-        multiplier_on_B = np.zeros(Nhidden)
-
-        self._lmbd_cont_real = nn.Parameter(torch.from_numpy(lmbd_cont_real.astype(np.float32)))
-        self._lmbd_cont_imag = nn.Parameter(torch.from_numpy(lmbd_cont_imag.astype(np.float32)))
-        self._B = nn.Parameter(torch.from_numpy(B.astype(np.float32)))
-        self._multiplier_on_B = nn.Parameter(torch.from_numpy(multiplier_on_B.astype(np.float32)))
-
-        self.y2x = nn.Linear(Ny, Nhidden)
-        self.x2y = nn.Linear(Nhidden, Ny)
-
-    def forward(self, _y0, _U):
-        # _y0: (*, Ny), _U: (Nhrz, *, Nu)
-        Nhrz = _U.shape[0]
-
-        X = []
-        _Bu = torch.matmul(_U, self._B.t() ) \
-            * torch.exp(self._multiplier_on_B)# (Nhrz, *, Nx)
-
-        _r = torch.exp(-torch.abs(self._lmbd_cont_real)) # (Nx//2,)
-        _theta = np.pi/2 * self._lmbd_cont_imag # (Nx//2,)
-        _lmbd_real = _r * torch.cos(_theta) # (Nx//2,)
-        _lmbd_imag = _r * torch.sin(_theta) # (Nx//2,)
-
-        _A11 = torch.diag(_lmbd_real) # = A22, (Nx//2, Nx//2)
-        _A21 = torch.diag(_lmbd_imag) # = A21, (Nx//2, Nx//2)
-        _A = torch.cat((torch.cat((_A11, -_A21), dim=1), 
-            torch.cat((_A21, _A11), dim=1)), dim=0) #(Nx, Nx)
-
-        _x = self.y2x(_y0) # (*, Nhidden)
-        for k1 in range(Nhrz):
-            _x = torch.matmul(_x, _A.t()) + _Bu[k1,:]
-            X.append(_x)
-        _X = torch.stack(X, dim=0) # (Nhrz, *, Nx)
-        _Y = self.x2y(_X) # (Nhrz, *, Ny)
-        return _Y, dict()
-
-    def get_eig(self):
-        lmbd_cont_real = self._lmbd_cont_real.data.numpy()
-        lmbd_cont_imag = self._lmbd_cont_imag.data.numpy()
-        
-        r = np.exp(-np.abs(lmbd_cont_real))
-        theta = np.pi/2 * lmbd_cont_imag
-        
-        lmbd_real = r * np.cos(theta)
-        lmbd_imag = r * np.sin(theta)
-        
-        eig_hat = np.concatenate((lmbd_real + 1j * lmbd_imag, lmbd_real - 1j * lmbd_imag))
-        return eig_hat
-
-
 
 class DataGenerator():
     def __init__(self, Nhidden, Ntrain = 2**12, T0 = 2**1, T1 = 2**7, 
@@ -373,7 +251,7 @@ class DataGenerator():
 
 
 def run_training(mdl_constructor, data_generator, Nhidden, Nbatch, Nepoch, Nhrz, 
-        weight_on_diff_loss = 0., print_log = True):
+        print_log = True):
     mdl = mdl_constructor(Nhidden)
     optimizer = torch.optim.Adam(mdl.parameters())
     Ntrain = data_generator.Ntrain
@@ -391,10 +269,7 @@ def run_training(mdl_constructor, data_generator, Nhidden, Nbatch, Nepoch, Nhrz,
             _Y = torch.tensor(Y[1:,:]) # (Nhrz, *, Ny)
 
             _Yhat, _ = mdl(_y0, _U) # (Nhrz, *, Ny)
-            _loss_plain = criterion(_Y, _Yhat)
-            #_loss_diff = criterion( _Y[1:,:] - _Y[:-1,:],  _Yhat[1:,:] - _Yhat[:-1,:])
-
-            _loss = _loss_plain 
+            _loss = criterion(_Y, _Yhat)
 
             loss = float(_loss)
             training_hist.append((epoch + k1/Nitr, loss))  
@@ -474,8 +349,7 @@ def test001():
         _U = torch.tensor(U) # (Nhrz, *, Nu)
 
         print("Ny, Nu, Nhidden = (%d, %d, %d)" % (Ny, Nu, Nhidden))
-        for model_constructor in [model001, model002, model003, 
-            model004, model003b]:
+        for model_constructor in [model001, model002, model003, model004,]:
 
             mdl = model_constructor(Ny, Nu, Nhidden*2)
 
