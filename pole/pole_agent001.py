@@ -7,17 +7,17 @@ Created on 2020/07/16
 import torch
 import torch.nn as nn
 import numpy as np
-from sl_agent import SlAgent
 from pole_batch_data_agent import PoleBatchDataAgent
 from pole_batch_data_environment import PoleBatchDataEnvironment
+from pole_agent import PoleAgent
 
-class PoleAgent001(SlAgent, nn.Module):
+class PoleAgent001(PoleAgent, nn.Module):
     '''
     classdocs
     '''
 
     def __init__(self, Ny, Nu, Nhidden):
-        SlAgent.__init__(self)
+        super(PoleAgent001, self).__init__()
         
         self.Ny, self.Nu, self.Nhidden = Ny, Nu, Nhidden 
         self.y2x = nn.Linear(Ny, Nhidden)

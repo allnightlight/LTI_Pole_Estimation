@@ -10,6 +10,9 @@ from torch.optim import Adam
 from pole_batch_data_agent import PoleBatchDataAgent
 from pole_batch_data_environment import PoleBatchDataEnvironment
 from sl_trainer import SlTrainer
+from builtins import isinstance
+from pole_agent import PoleAgent
+from pole_environment import PoleEnvironment
 
 
 class PoleTrainer(SlTrainer):
@@ -20,6 +23,9 @@ class PoleTrainer(SlTrainer):
 
     def __init__(self, agent, environment):
         SlTrainer.__init__(self, agent, environment)
+        
+        assert isinstance(agent, PoleAgent)
+        assert isinstance(environment, PoleEnvironment)
         
         self.optimizer = Adam(agent.parameters())
         

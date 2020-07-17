@@ -9,8 +9,7 @@ import unittest
 from builder import Builder
 from loader import Loader
 from mylogger import MyLogger
-from pole_agent001 import PoleAgent001
-from pole_agent004 import PoleAgent004
+from pole_agent import PoleAgent
 from pole_agent_factory import PoleAgentFactory
 from pole_build_parameter import PoleBuildParameter
 from pole_build_parameter_factory import PoleBuildParameterFactory
@@ -43,9 +42,9 @@ class Test(unittest.TestCase):
         self.builder = Builder(trainerFactory, agentFactory, environmentFactory, store, logger)
         
         self.buildParameters = []
-        for k1 in range(3):
-            nIntervalSave = 10
-            nEpoch = 100
+        for k1 in range(2):
+            nIntervalSave = 3
+            nEpoch = 5
             self.buildParameters.append(PoleBuildParameter(int(nIntervalSave), int(nEpoch), label="test" + str(k1)))
         
         self.loader = Loader(agentFactory, buildParameterFactory, environmentFactory, store)
@@ -64,7 +63,7 @@ class Test(unittest.TestCase):
             
         assert isinstance(self.loader, Loader)        
         for agent, buildParameter, epoch in self.loader.load("test%", None):
-            assert isinstance(agent, PoleAgent001) or isinstance(agent, PoleAgent004) 
+            assert isinstance(agent, PoleAgent)  
             assert isinstance(buildParameter, PoleBuildParameter)
 
 if __name__ == "__main__":
