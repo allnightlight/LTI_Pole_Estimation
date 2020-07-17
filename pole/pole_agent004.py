@@ -28,6 +28,8 @@ class PoleAgent004(PoleAgent, nn.Module):
         self._log_lmbd_cont_real = nn.Parameter(torch.from_numpy(log_lmbd_cont_real.astype(np.float32)))
         self._log_lmbd_cont_imag = nn.Parameter(torch.from_numpy(log_lmbd_cont_imag.astype(np.float32)))
         self._B = nn.Parameter(torch.from_numpy(B.astype(np.float32)))
+        
+        self._bias = nn.Parameter(torch.zeros(size=(Nhidden,))) # (Nhidden,)
 
         self.y2x = nn.Linear(Ny, Nhidden)
         self.x2y = nn.Linear(Nhidden, Ny)
@@ -59,7 +61,7 @@ class PoleAgent004(PoleAgent, nn.Module):
 
         _x = self.y2x(_y0) # (*, Nhidden)
         for k1 in range(Nhrz):
-            _x = torch.matmul(_x, _A.t()) + _Bu[k1,:]
+            _x = torch.matmul(_x, _A.t()) + _Bu[k1,:] + self._bias
             X.append(_x)
         _X = torch.stack(X, dim=0) # (Nhrz, *, Nx)
         _Y = self.x2y(_X) # (Nhrz, *, Ny)
