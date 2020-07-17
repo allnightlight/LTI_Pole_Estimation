@@ -42,7 +42,8 @@ class Store(object):
             );
         
             """)
-        
+       
+            conn.commit() 
             conn.close()
 
         if not os.path.exists(dbPath):
