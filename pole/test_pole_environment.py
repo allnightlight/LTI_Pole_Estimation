@@ -31,6 +31,18 @@ class Test(unittest.TestCase):
             assert isinstance(batchDataEnvironment, PoleBatchDataEnvironment)
         
 
+    def test003(self):
+        
+        for _ in range(10):
+            Nhidden = int(np.random.randint(5)) * 2 
+            
+            environment = PoleEnvironment(Nhidden=Nhidden, Ntrain=2**10, T0=2**3, T1=2**4, Ny=1, Nu=1, Nbatch=2**5, Nhrz=2**3, seed = 1)
+            
+            eig = environment.get_eig()
+            
+            assert eig.shape == (Nhidden,)
+            assert np.all(np.abs(eig) <= 1. + 1e-8)
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test001']
     unittest.main()

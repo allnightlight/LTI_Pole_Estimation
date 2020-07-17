@@ -56,3 +56,10 @@ class PoleEnvironment(SlEnvironment):
             batchDataEnvironment = PoleBatchDataEnvironment(_y0, _U, _Y)
             
             yield batchDataEnvironment
+    
+    def get_eig(self):
+        
+        A = self.dataGeneratorSingleton.A        
+        eig, _ = np.linalg.eig(A)
+        
+        return eig
