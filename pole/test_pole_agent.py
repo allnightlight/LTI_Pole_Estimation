@@ -5,10 +5,12 @@ Created on 2020/07/16
 '''
 import unittest
 
+import numpy as np
 from pole_agent001 import PoleAgent001
 from pole_agent004 import PoleAgent004
 from pole_environment import PoleEnvironment
 from pole_batch_data_agent import PoleBatchDataAgent
+from pole_agent import PoleAgent
 
 
 class Test(unittest.TestCase):
@@ -31,6 +33,27 @@ class Test(unittest.TestCase):
                 
                 assert isinstance(batchDataOut, PoleBatchDataAgent)
         
+
+    def test002(self):
+        
+        Ny = 2
+        Nu = 3
+        
+        params = dict(Ny=Ny, Nu=Nu, Nhidden=2**3)
+        
+        agent = PoleAgent001(**params)
+        agentAnother = PoleAgent001(**params)
+        assert isinstance(agent, PoleAgent)
+        
+        agentMemento = agent.createMemento()
+        
+        agentAnother.loadMemento(agentMemento)
+        
+        for _p1, _p2 in zip(agent.parameters(), agentAnother.parameters()):
+            p1 = _p1.data.numpy()
+            p2 = _p2.data.numpy()
+            assert np.all(p1 == p2)        
+
         
 
 if __name__ == "__main__":
