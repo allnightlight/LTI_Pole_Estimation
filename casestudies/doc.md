@@ -31,14 +31,7 @@ The figure 3.1.1 shows the learning curves
 of the discrepancy between the true pole distribution
 and the estimated one defined as follows:
 
-<img src = "./img/texclip20200718160550.png" width = "50%">
-
-<img src = "./img/texclip20200718160550.png" width = "66%">
-
 <img src = "./img/texclip20200718160550.png" width = "83%">
-
-<img src = "./img/texclip20200718160550.png" width = "100%">
-
 
 It's confirmed that the estimated errors have converted 
 at the end of training iterations.
