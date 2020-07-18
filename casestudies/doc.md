@@ -39,9 +39,13 @@ at the end of training iterations.
 The figure 3.1.2 shows some examples of the pair of
 the targeted pole distribution and the trained one,
 which are selected randomly among the trained networks.
-It can be seen that some poles are estimated almost precisely,
-but other poles are missed completely.
+It can be seen that all the poles are missed.
 
+<img src = "./img/pole_distribution_discrepancy_case_study_001a.png" width = "50%">
+Figure 3.1.1 Learning curves of the discrepancy between the true pole distribution and the estimated one
+
+<img src = "./img/pole_distribution_examples_case_study_001a.png" width = "50%">
+Figure 3.1.2 Targeted pole distributions and trained ones
 
 ## 3-2. Case study #2:
 
