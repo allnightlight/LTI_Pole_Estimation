@@ -25,7 +25,23 @@ editing
 
 ## 3-1. Case study #1:
 
-editing
+In this case study,
+LRN systems were trained by using the hyperparameters in the table 3.1.1.
+The figure 3.1.1 shows the learning curves
+of the discrepancy between the true pole distribution
+and the estimated one defined as follows:
+
+<img src = "./img/texclip20200718160550.png" width = "50%">
+
+It's confirmed that the estimated errors have converted 
+at the end of training iterations.
+
+The figure 3.1.2 shows some examples of the pair of
+the targeted pole distribution and the trained one,
+which are selected randomly among the trained networks.
+It can be seen that some poles are estimated almost precisely,
+but other poles are missed completely.
+
 
 ## 3-2. Case study #2:
 
