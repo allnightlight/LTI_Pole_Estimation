@@ -2,9 +2,9 @@
 
 # 1. Introduction
 
-Pole distribution is a feature to describe the linear time-invariant (LTI) system.
+Pole distribution is a feature to characterise the linear time-invariant (LTI) system.
 According to the pole distribution of the system,
-the different dynamism is observed in trend.
+the different dynamism is observed in the time scaled trend.
 
 Linearly recurrent network (LRN) system is a branch
 of the sequential model in the machine learning.
