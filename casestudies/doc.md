@@ -24,6 +24,8 @@ Agents are trained by the following criteria:
 
 <img src = "./img/texclip20200719102549.png" width = "83%">
 
+<img src = "./img/texclip20200719102549.png">
+
 ,where `y(t)` denotes the observation at the time `t` 
 and `yhat(t|s)` denotes the prediction at the time `t (t>s)`
 given the observation at the time `s` and the input series between `s` and `t`.
