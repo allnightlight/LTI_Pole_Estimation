@@ -53,7 +53,9 @@ at the end of training iterations.
 The figure 3.1.2 shows some examples of the pair of
 the targeted pole distribution and the trained one,
 which are selected randomly among the trained networks.
-It can be seen that all the poles are missed.
+It can be seen that all the poles are missed
+and that estimated poles are not always but sometimes located beyond the unit circle,
+which means that the estimated LRN system might be unstable.
 
 <img src = "./img/pole_distribution_discrepancy_case_study_001a.png" width = "50%">
 Figure 3.1.1 Learning curves of the discrepancy between the true pole distribution and the estimated one
@@ -85,3 +87,9 @@ It's confirmed that
 
 Figure 3.2.2 show some examples of pole distributions of randomly selected trained agents.
 Some estimated poles are matched with the true ones, but the other poles failed.
+
+<img src = "./img/pole_distribution_discrepancy_case_study_002a.png" width = "50%">
+Figure 3.2.1 Learning curves of the discrepancy between the true pole distribution and the estimated one
+
+<img src = "./img/pole_distribution_examples_case_study_002a.png" width = "50%">
+Figure 3.2.2 Targeted pole distributions and trained ones
