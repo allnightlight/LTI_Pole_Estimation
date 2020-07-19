@@ -17,7 +17,19 @@ and how to improve the estimation by tuning training hyperparameters.
 
 # 2. Specifications
 
-editing
+
+## loss function
+
+Agents are trained by the following criteria:
+
+<img src = "./img/texclip20200719102549.png" width = "83%">
+
+,where `y(t)` denotes the observation at the time `t` 
+and `yhat(t|s)` denotes the prediction at the time `t (t>s)`
+given the observation at the time `s` and the input series between `s` and `t`.
+The time span between `s` and `s + Nhrz` is called the prediction horizon 
+at the query of prediction at the time `s`
+
 
 # 3. Case studies
 
@@ -49,4 +61,25 @@ Figure 3.1.2 Targeted pole distributions and trained ones
 
 ## 3-2. Case study #2:
 
-editing
+Generally speaking,
+time constant of environment
+is longer than sampling interval,
+which implies that
+, if an agent is allowed to see the prediction at the next step,
+it might be hard for the agent to learn the entire response of the environment.
+Intuitively, the prediction horizon should be similar to or longer than
+the time constant of the environment.
+
+In this case study,
+we choose the prediction horizon among the options of 1,4 and 16,
+as shown in the table 3.2.1,
+since the targeted environment has time constants distributed between 4 and 32.
+
+Figure 3.2.1 shows the learning curves
+of the pole distribution discrepancy, already  mentioned in the case study 1.
+It's confirmed that
+- the discrepancy have almost converged at the end of the training iterations,
+- and the mismatches of the pole distribution reduce depending on the length of the prediction horizon.
+
+Figure 3.2.2 show some examples of pole distributions of randomly selected trained agents.
+Some estimated poles are matched with the true ones, but the other poles failed.
