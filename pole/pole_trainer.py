@@ -36,9 +36,9 @@ class PoleTrainer(SlTrainer):
         assert isinstance(batchDataOut, PoleBatchDataAgent)
         
         _Y = batchDataIn._Y # (Nhrz+1, *, Ny)
-        _Yhat = batchDataOut._Yhat # (Nhrz, * , Ny)
+        _Yhat = batchDataOut._Yhat # (Nhrz+1, * , Ny)
         
-        _loss = torch.mean((_Y[1:,...] - _Yhat)**2)
+        _loss = torch.mean((_Y - _Yhat)**2)
         
         self.optimizer.zero_grad()
         _loss.backward()

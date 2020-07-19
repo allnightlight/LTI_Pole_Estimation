@@ -60,11 +60,12 @@ class PoleAgent004(PoleAgent, nn.Module):
         _Bu = torch.matmul(_U, self._B.t())  * _normalized_factor # (Nhrz, *, Nx)
 
         _x = self.y2x(_y0) # (*, Nhidden)
+        X.append(_x)
         for k1 in range(Nhrz):
             _x = torch.matmul(_x, _A.t()) + _Bu[k1,:] + self._bias
             X.append(_x)
-        _X = torch.stack(X, dim=0) # (Nhrz, *, Nx)
-        _Y = self.x2y(_X) # (Nhrz, *, Ny)
+        _X = torch.stack(X, dim=0) # (Nhrz+1, *, Nx)
+        _Y = self.x2y(_X) # (Nhrz+1, *, Ny)
         
         batchDataOut = PoleBatchDataAgent(_Y)
 
