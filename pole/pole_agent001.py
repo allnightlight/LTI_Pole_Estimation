@@ -35,12 +35,13 @@ class PoleAgent001(PoleAgent, nn.Module):
  
         X = []
         _x = self.y2x(_y0) # (*, Nhidden)
+        X.append(_x)
         for k1 in range(Nhrz):
             _u = _U[k1,:] # (*, Nu)
             _x = self.xu2x(torch.cat((_x, _u), dim=1)) # (*, Nhidden)
             X.append(_x)
-        _X = torch.stack(X, dim=0) # (Nhrz, *, Nhidden)
-        _Y = self.x2y(_X) # (Nhrz, *, Ny)
+        _X = torch.stack(X, dim=0) # (Nhrz+1, *, Nhidden)
+        _Y = self.x2y(_X) # (Nhrz+1, *, Ny)
         
         batchDataOut = PoleBatchDataAgent(_Y)
 
