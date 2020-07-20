@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
         params = dict(Ny=Ny, Nu=Nu, Nhidden=2**3)
         
         for agent in (PoleAgent001(**params)
-                      , PoleAgent002(**params)
+                      , PoleAgent002(**params, dampingConstantInitial=0.99)
                       , PoleAgent003(**params, dampingConstantInitial=0.99)
                       , PoleAgent004(**params, dampingConstantInitial=0.99)):
             
