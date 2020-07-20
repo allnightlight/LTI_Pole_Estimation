@@ -86,7 +86,11 @@ It's confirmed that
 - and the mismatches of the pole distribution reduce depending on the length of the prediction horizon.
 
 Figure 3.2.2 show some examples of pole distributions of randomly selected trained agents.
-Some estimated poles are matched with the true ones, but the other poles failed.
+Some poles of trained systems match with the poles of targeted system
+or are located in the center of groups of the targeted poles as if they represented the groups.
+The rest of poles of the trained systems are apart from the unit circle,
+this means that the trained system does not have the capacity
+to estimate long-term behaviour of the targeted system.
 
 <img src = "./img/pole_distribution_discrepancy_case_study_002a.png" width = "50%">
 Figure 3.2.1 Learning curves of the discrepancy between the true pole distribution and the estimated one
