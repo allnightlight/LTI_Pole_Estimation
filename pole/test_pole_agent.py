@@ -6,11 +6,13 @@ Created on 2020/07/16
 import unittest
 
 import numpy as np
-from pole_agent001 import PoleAgent001
-from pole_agent004 import PoleAgent004
-from pole_environment import PoleEnvironment
-from pole_batch_data_agent import PoleBatchDataAgent
 from pole_agent import PoleAgent
+from pole_agent001 import PoleAgent001
+from pole_agent002 import PoleAgent002
+from pole_agent003 import PoleAgent003
+from pole_agent004 import PoleAgent004
+from pole_batch_data_agent import PoleBatchDataAgent
+from pole_environment import PoleEnvironment
 
 
 class Test(unittest.TestCase):
@@ -26,6 +28,8 @@ class Test(unittest.TestCase):
         params = dict(Ny=Ny, Nu=Nu, Nhidden=2**3)
         
         for agent in (PoleAgent001(**params)
+                      , PoleAgent002(**params)
+                      , PoleAgent003(**params)
                       , PoleAgent004(**params)):
             
             for batchDataIn in environment.generateBatchDataIterator():

@@ -22,6 +22,10 @@ class PoleAgentFactory(SlAgentFactory):
         agent = None
         if buildParameter.agentClass == "agent001":
             agent = PoleAgent001(Ny = buildParameter.Ny, Nu = buildParameter.Nu, Nhidden = buildParameter.NhiddenAgent)
+        if buildParameter.agentClass == "agent002":
+            agent = PoleAgent001(Ny = buildParameter.Ny, Nu = buildParameter.Nu, Nhidden = buildParameter.NhiddenAgent)
+        if buildParameter.agentClass == "agent003":
+            agent = PoleAgent001(Ny = buildParameter.Ny, Nu = buildParameter.Nu, Nhidden = buildParameter.NhiddenAgent)
         if buildParameter.agentClass == "agent004":        
             agent = PoleAgent004(Ny = buildParameter.Ny, Nu = buildParameter.Nu, Nhidden = buildParameter.NhiddenAgent)
         assert agent is not None
