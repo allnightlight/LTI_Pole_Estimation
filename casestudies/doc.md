@@ -97,3 +97,21 @@ Figure 3.2.1 Learning curves of the discrepancy between the true pole distributi
 
 <img src = "./img/pole_distribution_examples_case_study_002a.png" width = "50%">
 Figure 3.2.2 Targeted pole distributions and trained ones
+
+## 3-3. Case study #3:
+
+As mentioned in the discussion of the case study #2,
+trained system can loose the capacity of the long-term prediction capacity.
+This might be because the random initialization of the system matrix of agents
+randomly allocates its poles on the complex plain which does not always have the position near the unit circle.
+Therefore, this case study assign the poles inside the unit circle but close to the edge
+in the initialization by exploiting the canonical decomposition of the linear system.
+
+Agents are parameterized as follows:
+x_{i}(t+1) = lambda_{i} * x_{i}(t) + sum(b_{ij} * w_{j}(t),j), i = 0:n,
+y(t) = C * x(t) + c.c..
+And, lambda_{i} and b_{ij} are initialized like this:
+|lambda_{i}| = d, b_{ij} ~ N(0, sigma^2), sigma^2 = 1-d^2,
+where d denote the initial damping constant, a given parameter.
+
+ 
