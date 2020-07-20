@@ -28,8 +28,8 @@ class Test(unittest.TestCase):
         
         for agent in (PoleAgent001(**params)
                       , PoleAgent002(**params)
-                      , PoleAgent003(**params)
-                      , PoleAgent004(**params)):
+                      , PoleAgent003(**params, dampingConstantInitial=0.99)
+                      , PoleAgent004(**params, dampingConstantInitial=0.99)):
             
             trainer = PoleTrainer(agent, environment)
             assert isinstance(trainer, PoleTrainer)

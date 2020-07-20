@@ -46,6 +46,9 @@ class Test(unittest.TestCase):
             nIntervalSave = 3
             nEpoch = 5
             self.buildParameters.append(PoleBuildParameter(int(nIntervalSave), int(nEpoch), label="test" + str(k1)))
+
+        for agentClass in ("agent002", "agent003", "agent004"): 
+            self.buildParameters.append(PoleBuildParameter(int(nIntervalSave), int(nEpoch), agentClass = agentClass, label="test " + agentClass))        
         
         self.loader = Loader(agentFactory, buildParameterFactory, environmentFactory, store)
         

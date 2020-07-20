@@ -18,12 +18,13 @@ class PoleAgent003(PoleAgent, nn.Module):
     '''
 
 
-    def __init__(self, Ny, Nu, Nhidden):
+    def __init__(self, Ny, Nu, Nhidden, dampingConstantInitial):
         super(PoleAgent003, self).__init__()
         
         self.Ny, self.Nu, self.Nhidden = Ny, Nu, Nhidden 
 
-        lmbd_cont_real = np.random.rand(Nhidden//2) # (*, Nhidden//2)
+        assert dampingConstantInitial < 1.
+        lmbd_cont_real = (-np.log(dampingConstantInitial)) * np.ones(Nhidden//2) # (*, Nhidden//2)
         lmbd_cont_imag = np.random.rand(Nhidden//2) # (*, Nhidden//2)
         B = np.random.randn(Nhidden, Nu)/np.sqrt(Nu)
 
