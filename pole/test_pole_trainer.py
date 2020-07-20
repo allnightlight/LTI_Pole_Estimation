@@ -3,13 +3,15 @@ Created on 2020/07/16
 
 @author: ukai
 '''
+from builtins import isinstance
 import unittest
 
 from pole_agent001 import PoleAgent001
+from pole_agent002 import PoleAgent002
+from pole_agent003 import PoleAgent003
 from pole_agent004 import PoleAgent004
 from pole_environment import PoleEnvironment
 from pole_trainer import PoleTrainer
-from builtins import isinstance
 
 
 class Test(unittest.TestCase):
@@ -25,7 +27,9 @@ class Test(unittest.TestCase):
         params = dict(Ny=Ny, Nu=Nu, Nhidden=2**3)
         
         for agent in (PoleAgent001(**params)
-                      , PoleAgent004(**params)):
+                      , PoleAgent002(**params)
+                      , PoleAgent003(**params, dampingConstantInitial=0.99)
+                      , PoleAgent004(**params, dampingConstantInitial=0.99)):
             
             trainer = PoleTrainer(agent, environment)
             assert isinstance(trainer, PoleTrainer)
