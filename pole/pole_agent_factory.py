@@ -25,7 +25,7 @@ class PoleAgentFactory(SlAgentFactory):
         if buildParameter.agentClass == "agent001":
             agent = PoleAgent001(Ny = buildParameter.Ny, Nu = buildParameter.Nu, Nhidden = buildParameter.NhiddenAgent)
         if buildParameter.agentClass == "agent002":
-            agent = PoleAgent002(Ny = buildParameter.Ny, Nu = buildParameter.Nu, Nhidden = buildParameter.NhiddenAgent)
+            agent = PoleAgent002(Ny = buildParameter.Ny, Nu = buildParameter.Nu, Nhidden = buildParameter.NhiddenAgent, dampingConstantInitial = buildParameter.dampingConstantInitial)
         if buildParameter.agentClass == "agent003":
             agent = PoleAgent003(Ny = buildParameter.Ny, Nu = buildParameter.Nu, Nhidden = buildParameter.NhiddenAgent, dampingConstantInitial = buildParameter.dampingConstantInitial)
         if buildParameter.agentClass == "agent004":        

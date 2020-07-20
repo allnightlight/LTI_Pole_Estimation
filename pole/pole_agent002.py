@@ -18,22 +18,21 @@ class PoleAgent002(PoleAgent, nn.Module):
     classdocs
     '''
 
-    def __init__(self, Ny, Nu, Nhidden):
+    def __init__(self, Ny, Nu, Nhidden, dampingConstantInitial):
         super(PoleAgent002, self).__init__()
 
         self.Ny, self.Nu, self.Nhidden = Ny, Nu, Nhidden 
 
-        r = np.random.rand(Nhidden//2)
-        theta = np.random.rand(Nhidden//2) * np.pi/2
-        #theta = np.pi/4
+        r = np.ones(Nhidden//2) * dampingConstantInitial # (Nhidden//2,)
+        theta = np.random.rand(Nhidden//2) * np.pi/2 # (Nhidden//2,)
+        
+        lmbd_real = r * np.cos(theta) # (Nhidden//2)
+        lmbd_imag = r * np.sin(theta) # (Nhidden//2)
+        B = np.random.randn(Nhidden, Nu)/np.sqrt(Nu) * np.sqrt(1-dampingConstantInitial**2) # (Nhidden, Nu)
 
-        lmbd_real = r * np.cos(theta) # (*, Nhidden//2)
-        lmbd_imag = r * np.sin(theta) # (*, Nhidden//2)
-        B = np.random.randn(Nhidden, Nu)/np.sqrt(Nu)
-
-        self._lmbd_real = nn.Parameter(torch.from_numpy(lmbd_real.astype(np.float32)))
-        self._lmbd_imag = nn.Parameter(torch.from_numpy(lmbd_imag.astype(np.float32)))
-        self._B = nn.Parameter(torch.from_numpy(B.astype(np.float32)))
+        self._lmbd_real = nn.Parameter(torch.from_numpy(lmbd_real.astype(np.float32))) # (Nhidden//2,)
+        self._lmbd_imag = nn.Parameter(torch.from_numpy(lmbd_imag.astype(np.float32))) # (Nhidden//2,)
+        self._B = nn.Parameter(torch.from_numpy(B.astype(np.float32))) # (Nhidden, Nu)
 
         self.y2x = nn.Linear(Ny, Nhidden)
         self.x2y = nn.Linear(Nhidden, Ny)
