@@ -114,4 +114,23 @@ And, lambda_{i} and b_{ij} are initialized like this:
 |lambda_{i}| = d, b_{ij} ~ N(0, sigma^2), sigma^2 = 1-d^2,
 where d denote the initial damping constant, a given parameter.
 
- 
+The figure 3.3.1 show the learning curves of the performance defined in the case study 1.
+Thanks for the random allocation of the initial poles on the edge of the unit circle,
+the performances converge faster than the agents with the system matrix initialized randomly. 
+Furthermore, the variance of the error is shrank, though,
+the average performance does not has big difference between two types of agents.
+The latter is understandable since it's normal that neither the diffrent expressions of the system
+nor the different initialization of the poles
+can improve the estimation capacity of the pole distribution.
+
+The figure 3.3 shows some examples of estimated pole distribution.
+In so much as these examples,
+there is no unrelevant poles of the trained system.
+No pole is located apart from the unit circle
+or from the targeted pole distribution.
+
+<img src = "./img/pole_distribution_discrepancy_case_study_003a.png" width = "50%">
+Figure 3.3.1 Learning curves of the discrepancy between the true pole distribution and the estimated one
+
+<img src = "./img/pole_distribution_examples_case_study_003a.png" width = "50%">
+Figure 3.3.2 Targeted pole distributions and trained ones
