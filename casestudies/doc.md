@@ -17,12 +17,35 @@ and how to improve the estimation by tuning training hyperparameters.
 
 # 2. Specifications
 
+## Agent's parameterization
+
+The LTI system of agent is parameterised in the following ways.
+
+### general representation
+
+Here is the representation of agent.
+
+<img src = "./img/texclip20200722185101.png">
+
+Where `x(t),u(t),y(t)` are state variable, input variable and output varible, respectively.
+And the parameters to train are `A, B, C`.
+
+### diagonal canonical form
+
+The dynamism of agents are represented as follows:
+
+<img src = "./img/texclip20200722191632.png">
+
+We supposed that `n` is even number.
+And, `alpha_{i}, \beta_{i}` are initialized as follows:
+
+<img src = "./img/texclip20200722192115.png">
+
+where `d` denote the initial damping constant as a given parameter.
 
 ## loss function
 
 Agents are trained by the following criteria:
-
-<img src = "./img/texclip20200719102549.png" width = "83%">
 
 <img src = "./img/texclip20200719102549.png">
 
@@ -101,18 +124,15 @@ Figure 3.2.2 Targeted pole distributions and trained ones
 ## 3-3. Case study #3:
 
 As mentioned in the discussion of the case study #2,
-trained system can loose the capacity of the long-term prediction capacity.
-This might be because the random initialization of the system matrix of agents
-randomly allocates its poles on the complex plain which does not always have the position near the unit circle.
-Therefore, this case study assign the poles inside the unit circle but close to the edge
-in the initialization by exploiting the canonical decomposition of the linear system.
+trained system can have poles apart from the edge of the unit circle.
+The poles near the center represent the short term response of the linear system.
+Our target system has the long term response, in another words,
+the poles of the targeted system are distributed over the edge of the unit circle.
+However, the sytem matrix of agent initialized randomly can not have such a pole distribution.
+Therefore, this case study manipuluates the initial pole distribution
+by exploiting the diagnal canonical form of the linear system.
 
-Agents are parameterized as follows:
-x_{i}(t+1) = lambda_{i} * x_{i}(t) + sum(b_{ij} * w_{j}(t),j), i = 0:n,
-y(t) = C * x(t) + c.c..
-And, lambda_{i} and b_{ij} are initialized like this:
-|lambda_{i}| = d, b_{ij} ~ N(0, sigma^2), sigma^2 = 1-d^2,
-where d denote the initial damping constant, a given parameter.
+The training parameters are shown in the table 3.3.1.
 
 The figure 3.3.1 show the learning curves of the performance defined in the case study 1.
 Thanks for the random allocation of the initial poles on the edge of the unit circle,
