@@ -20,7 +20,7 @@ and how to improve the estimation by tuning training hyperparameters.
 ## 2.1. Agent's parameterization
 
 The LTI system of agent is parameterised in the following ways.
-The parameterization of agent can be selected by the hyperparameter as shown in the table 2.1.1:
+The parameterization of agent can be selected by the hyperparameter as shown in the table 2.1.1.
 
 Table 2.1.1. the pair of the hyperparameter and the agent realization
 |agentClass| agent realization |
@@ -63,6 +63,26 @@ and `yhat(t|s)` denotes the prediction at the time `t (t>s)`
 given the observation at the time `s` and the input series between `s` and `t`.
 The time span between `s` and `s + Nhrz` is called in this text the prediction horizon 
 at the query of prediction at the time `s`. And the `Nhrz` is a given hyperparameter.
+
+
+## 2.3. targeted environments
+
+Our targeted environments are also LTI systems.
+They follow the following specifications.
+- The poles are distributed on the edge of the unit circle, 
+which means that the environments react to the input with the longer time constant than the sampling interval.
+	- The margin between the edge of pole distribution is controlled by the boundry of the time constant.
+- The input to the environments are sampled the white noise in order to satisfy the persistent excitation condtion.
+- The dimension of observation is equal with the one of state variable in order to avoid the difficulty of the partial observation.
+
+The environments are controlled by the following hyperparameters:
+
+|parameter|description|options|
+|-|-|
+|`NhiddenEnvironment`| dimension of state variable | 2, 4 and 8 |
+|`Ninput`| dimension of input | 1 |
+|`T0`| the lower bound of time constant | 4 |
+|`T1`| the lower bound of time constant | 32 |
 
 
 # 3. Case studies
