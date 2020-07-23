@@ -83,6 +83,7 @@ The environments are controlled by the following hyperparameters:
 |`Ninput`| dimension of input | 1 |
 |`T0`| the lower bound of time constant | 4 |
 |`T1`| the lower bound of time constant | 32 |
+|`seed`| the seed of the random stream for the parameter initialization | 0, 1 and 2|
 
 
 # 3. Case studies
