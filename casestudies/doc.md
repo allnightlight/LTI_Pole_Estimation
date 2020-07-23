@@ -19,7 +19,14 @@ and how to improve the estimation by tuning training hyperparameters.
 
 ## Agent's parameterization
 
-The LTI system of agent is parameterised in the following ways.
+The LTI system of agent is parameterised in the following two ways.
+The parameterization of agent can be selected by the hyperparameter as follows:
+
+Table 2.1. the pair of the hyperparameter and the agent realization
+|`agentClass`| agent realization |
+|-|-|
+|agent001| general representation |
+|agent002| diagonal canonical form |
 
 ### general representation
 
@@ -27,8 +34,8 @@ Here is the representation of agent.
 
 <img src = "./img/texclip20200722185101.png">
 
-Where `x(t),u(t),y(t)` are state variable, input variable and output varible, respectively.
-And the parameters to train are `A, B, C`.
+Note that `x(t),u(t) and y(t)` are state variable, input variable and output varible, respectively,
+and that `A, B and C` are trained by using the machine learning technique.
 
 ### diagonal canonical form
 
@@ -36,12 +43,14 @@ The dynamism of agents are represented as follows:
 
 <img src = "./img/texclip20200722191632.png">
 
-We supposed that `n` is even number.
-And, `alpha_{i}, \beta_{i}` are initialized as follows:
+We supposed that `n` is a even number 
+and that `alpha_{i} and beta_{i} (i=1...n/2)` are initialized randomly, subject to the following equation:
 
 <img src = "./img/texclip20200722192115.png">
 
-where `d` denote the initial damping constant as a given parameter.
+Note that `d` denotes the initial damping constant as a given parameter.
+
+`alpha_{i}, beta_{i} (i=1...n/2), B and C` are trained by using the machine learning technique.
 
 ## loss function
 
