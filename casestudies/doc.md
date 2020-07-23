@@ -146,8 +146,8 @@ It's confirmed that
 Figure 3.2.2 shows some examples of pole distributions of randomly selected trained agents.
 Some poles of trained systems match with the poles of targeted system
 or are located in the center of groups of the targeted poles as if they represented the groups.
-The rest of poles of the trained systems are apart from the unit circle,
-this means that the trained system lost partially the capacity
+The rest of poles of the trained systems are located inner of the unit circle.
+This means that the trained system lost partially the capacity
 to estimate long-term behaviour of the targeted system.
 
 Table 3.2.1 Hyper parameters
