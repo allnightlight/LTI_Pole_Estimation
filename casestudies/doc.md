@@ -175,6 +175,7 @@ Therefore, this case study manipuluates the initial pole distribution
 by exploiting the diagnal canonical form of the linear system.
 
 The training parameters are shown in the table 3.3.1.
+We compare the cases between two types of agent representation.
 The figure 3.3.1 shows the learning curves of the performance defined in the case study 1.
 It's confirmed that thanks for the random allocation of the initial poles on the edge of the unit circle,
 - the performance convergence becomes fast,
