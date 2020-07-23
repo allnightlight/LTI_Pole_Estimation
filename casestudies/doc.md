@@ -111,6 +111,7 @@ which means that the estimated LRN system might be unstable.
 
 Table 3.1.1 Hyper parameters
 | parameter | description | value |
+|-|-|-|
 | `agentClass` | agent realization | general representation |
 | `Nhrz` | length of prediction horizon | 1 |
 | `NhiddenAgent` | dimension of agent | equals with the environment dimension |
