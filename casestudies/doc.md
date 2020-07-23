@@ -166,30 +166,39 @@ Figure 3.2.2 Targeted pole distributions and trained ones
 ## 3-3. Case study #3:
 
 As mentioned in the discussion of the case study #2,
-trained system can have poles apart from the edge of the unit circle.
-The poles near the center represent the short term response of the linear system.
+trained system can have poles inner of the edge of the unit circle.
+Those poles represent the quick response dynamism of the agent.
 Our target system has the long term response, in another words,
 the poles of the targeted system are distributed over the edge of the unit circle.
-However, the sytem matrix of agent initialized randomly can not have such a pole distribution.
+However, the sytem matrix of agent are initialized randomly and that's why they can not have such a pole distribution.
 Therefore, this case study manipuluates the initial pole distribution
 by exploiting the diagnal canonical form of the linear system.
 
 The training parameters are shown in the table 3.3.1.
+The figure 3.3.1 shows the learning curves of the performance defined in the case study 1.
+It's confirmed that thanks for the random allocation of the initial poles on the edge of the unit circle,
+- the performance convergence becomes fast,
+- and the variance of the discrepancy is shrank, 
+- though, the average performance does not has big difference between two types of agents.
 
-The figure 3.3.1 show the learning curves of the performance defined in the case study 1.
-Thanks for the random allocation of the initial poles on the edge of the unit circle,
-the performances converge faster than the agents with the system matrix initialized randomly. 
-Furthermore, the variance of the error is shrank, though,
-the average performance does not has big difference between two types of agents.
-The latter is understandable since it's normal that neither the diffrent expressions of the system
+The last one is understandable since it's normal that neither the diffrent expressions of the system
 nor the different initialization of the poles
 can improve the estimation capacity of the pole distribution.
+They can lead to only the stability of the training.
 
-The figure 3.3 shows some examples of estimated pole distribution.
+The figure 3.3.2 shows some examples of estimated pole distribution.
 In so much as these examples,
 there is no unrelevant poles of the trained system.
-No pole is located apart from the unit circle
-or from the targeted pole distribution.
+No pole is located inner of the unit circle
+or apart from the targeted pole distribution.
+
+Table 3.3.1 Hyper parameters
+| parameter | description | value |
+|-|-|-|
+| `agentClass` | agent realization | general representation or diagonal canonical form|
+| `Nhrz` | length of prediction horizon | 16|
+| `NhiddenAgent` | dimension of agent | equals with the environment dimension |
+
 
 <img src = "./img/pole_distribution_discrepancy_case_study_003a.png" width = "50%">
 Figure 3.3.1 Learning curves of the discrepancy between the true pole distribution and the estimated one
