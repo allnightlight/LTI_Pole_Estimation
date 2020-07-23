@@ -126,30 +126,36 @@ Figure 3.1.2 Targeted pole distributions and trained ones
 
 Generally speaking,
 time constant of environment
-is longer than sampling interval,
-which implies that
-, if an agent is allowed to see the prediction at the next step,
-it might be hard for the agent to learn the entire response of the environment.
-Intuitively, the prediction horizon should be similar to or longer than
+is longer than sampling interval.
+It implies that if an agent is allowed to see the prediction at only the next step,
+it's hard for the agent to learn from the entire response of the environment.
+Thus, the prediction horizon should be similar to or longer than
 the time constant of the environment.
 
 In this case study,
-we choose the prediction horizon among the options of 1,4 and 16,
+we select the prediction horizon among the options of 1,4 and 16,
 as shown in the table 3.2.1,
 since the targeted environment has time constants distributed between 4 and 32.
 
 Figure 3.2.1 shows the learning curves
-of the pole distribution discrepancy, already  mentioned in the case study 1.
+of the pole distribution discrepancy defined in the case study 1.
 It's confirmed that
 - the discrepancy have almost converged at the end of the training iterations,
-- and the mismatches of the pole distribution reduce depending on the length of the prediction horizon.
+- and the mismatches of the pole distribution decrease as the length of the prediction horizon gets longer.
 
-Figure 3.2.2 show some examples of pole distributions of randomly selected trained agents.
+Figure 3.2.2 shows some examples of pole distributions of randomly selected trained agents.
 Some poles of trained systems match with the poles of targeted system
 or are located in the center of groups of the targeted poles as if they represented the groups.
 The rest of poles of the trained systems are apart from the unit circle,
-this means that the trained system does not have the capacity
+this means that the trained system lost partially the capacity
 to estimate long-term behaviour of the targeted system.
+
+Table 3.2.1 Hyper parameters
+| parameter | description | value |
+|-|-|-|
+| `agentClass` | agent realization | general representation |
+| `Nhrz` | length of prediction horizon | 1, 4 or 16|
+| `NhiddenAgent` | dimension of agent | equals with the environment dimension |
 
 <img src = "./img/pole_distribution_discrepancy_case_study_002a.png" width = "50%">
 Figure 3.2.1 Learning curves of the discrepancy between the true pole distribution and the estimated one
