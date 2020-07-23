@@ -88,19 +88,18 @@ The environments are controlled by the following hyperparameters:
 
 # 3. Case studies
 
-editing
-
 ## 3-1. Case study #1:
 
 In this case study,
 LRN systems were trained by using the hyperparameters in the table 3.1.1.
+
 The figure 3.1.1 shows the learning curves
 of the discrepancy between the true pole distribution
 and the estimated one defined as follows:
 
 <img src = "./img/texclip20200718160550.png" width = "83%">
 
-It's confirmed that the estimated errors have converted 
+The figure 3.1.1 tells us that the estimated errors have converted 
 at the end of training iterations.
 
 The figure 3.1.2 shows some examples of the pair of
@@ -109,6 +108,12 @@ which are selected randomly among the trained networks.
 It can be seen that all the poles are missed
 and that estimated poles are not always but sometimes located beyond the unit circle,
 which means that the estimated LRN system might be unstable.
+
+Table 3.1.1 Hyper parameters
+| parameter | description | value |
+| `agentClass` | agent realization | general representation |
+| `Nhrz` | length of prediction horizon | 1 |
+| `NhiddenAgent` | dimension of agent | equals with the environment dimension |
 
 <img src = "./img/pole_distribution_discrepancy_case_study_001a.png" width = "50%">
 Figure 3.1.1 Learning curves of the discrepancy between the true pole distribution and the estimated one
