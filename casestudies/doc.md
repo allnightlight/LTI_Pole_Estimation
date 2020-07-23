@@ -17,13 +17,13 @@ and how to improve the estimation by tuning training hyperparameters.
 
 # 2. Specifications
 
-## Agent's parameterization
+## 2.1. Agent's parameterization
 
-The LTI system of agent is parameterised in the following two ways.
-The parameterization of agent can be selected by the hyperparameter as follows:
+The LTI system of agent is parameterised in the following ways.
+The parameterization of agent can be selected by the hyperparameter as shown in the table 2.1.1:
 
-Table 2.1. the pair of the hyperparameter and the agent realization
-|`agentClass`| agent realization |
+Table 2.1.1. the pair of the hyperparameter and the agent realization
+|agentClass| agent realization |
 |-|-|
 |agent001| general representation |
 |agent002| diagonal canonical form |
@@ -52,7 +52,7 @@ Note that `d` denotes the initial damping constant as a given parameter.
 
 `alpha_{i}, beta_{i} (i=1...n/2), B and C` are trained by using the machine learning technique.
 
-## loss function
+## 2.2. loss function
 
 Agents are trained by the following criteria:
 
@@ -61,8 +61,8 @@ Agents are trained by the following criteria:
 ,where `y(t)` denotes the observation at the time `t` 
 and `yhat(t|s)` denotes the prediction at the time `t (t>s)`
 given the observation at the time `s` and the input series between `s` and `t`.
-The time span between `s` and `s + Nhrz` is called the prediction horizon 
-at the query of prediction at the time `s`
+The time span between `s` and `s + Nhrz` is called in this text the prediction horizon 
+at the query of prediction at the time `s`. And the `Nhrz` is a given hyperparameter.
 
 
 # 3. Case studies
