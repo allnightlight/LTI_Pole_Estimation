@@ -71,14 +71,14 @@ Our targeted environments are also LTI systems.
 They follow the following specifications.
 - The poles are distributed on the edge of the unit circle, 
 which means that the environments react to the input with the longer time constant than the sampling interval.
-	- The margin between the edge of pole distribution is controlled by the boundry of the time constant.
-- The input to the environments are sampled the white noise in order to satisfy the persistent excitation condtion.
+The margin between the edge of pole distribution is controlled by the boundry of the time constant.
+- The input to the environments are the white noise in order to satisfy the persistent excitation condtion.
 - The dimension of observation is equal with the one of state variable in order to avoid the difficulty of the partial observation.
 
 The environments are controlled by the following hyperparameters:
 
 |parameter|description|options|
-|-|-|
+|-|-|-|
 |`NhiddenEnvironment`| dimension of state variable | 2, 4 and 8 |
 |`Ninput`| dimension of input | 1 |
 |`T0`| the lower bound of time constant | 4 |
